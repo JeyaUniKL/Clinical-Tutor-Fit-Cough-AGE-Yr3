@@ -217,17 +217,17 @@ Once the student submits their provisional diagnosis, deliver a structured debri
 """
 
 STATION_CONFIGS = {
-    "Station 01: Febrile Seizure (Maya, 2y)": {
+    "Station 01: Fit (Maya, 2y)": {
         "instruction": DOSSIER_STATION_01,
         "subtitle": "Informant: Puan Lin (Mother) | Chief Complaint: Seizure 2h ago",
         "initial_message": "Doctor, Maya suddenly started shaking all over 2 hours ago! Her body was burning hot, and I thought she was having a brain stroke or going to die. Is her brain damaged?",
     },
-    "Station 02: Acute Gastroenteritis (Rayyan, 14m)": {
+    "Station 02: Diarrhoea (Rayyan, 14m)": {
         "instruction": DOSSIER_STATION_02,
         "subtitle": "Informant: Puan Siti (Mother) | Chief Complaint: Vomiting & Diarrhoea for 2 days",
         "initial_message": "Doctor, please help my baby Rayyan. He has been throwing up and having loose watery stools for the past two days. He feels so weak and looks smaller!",
     },
-    "Station 03: Acute Bronchiolitis (Lucas, 6m)": {
+    "Station 03: Cough (Lucas, 6m)": {
         "instruction": DOSSIER_STATION_03,
         "subtitle": "Informant: Mr. David (Father) | Chief Complaint: Cough & Rapid Breathing for 2 days",
         "initial_message": "Doctor, Lucas has been coughing badly and struggling to breathe since last night. His chest keeps sucking in when he breathes, and he can barely finish his milk. Is he going to suffocate?",
