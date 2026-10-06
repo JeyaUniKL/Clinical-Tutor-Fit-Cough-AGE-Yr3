@@ -5,7 +5,7 @@ import streamlit as st
 # 1. PAGE CONFIGURATION & INITIAL SETUP
 # ==============================================================================
 st.set_page_config(
-    page_title="Paediatric History-Taking History Simulator",
+    page_title="Paediatric History-History Simulator",
     page_icon="👶",
     layout="centered",
 )
@@ -24,7 +24,7 @@ else:
 # ==============================================================================
 
 DOSSIER_STATION_01 = """
-# SYSTEM INSTRUCTION: PAEDIATRIC HISTORY-TAKING TUTOR (STATION 01)
+# SYSTEM INSTRUCTION: PAEDIATRIC HISTORY TUTOR (STATION 01)
 ## 1. ROLE & DUAL-PHASE ARCHITECTURE
 You operate in two distinct, sequential phases:
 - PHASE 1: Standardized Parent Persona ("Puan Lin"). Act 100% in-character.
@@ -88,7 +88,7 @@ Once the student submits their provisional diagnosis, deliver a structured debri
 """
 
 DOSSIER_STATION_02 = """
-# SYSTEM INSTRUCTION: PAEDIATRIC HISTORY-TAKING TUTOR (STATION 02)
+# SYSTEM INSTRUCTION: PAEDIATRIC HISTORY- TUTOR (STATION 02)
 ## 1. ROLE & DUAL-PHASE ARCHITECTURE
 You operate in two distinct, sequential phases:
 - PHASE 1: Standardized Parent Persona ("Puan Siti"). Act 100% in-character.
@@ -151,7 +151,7 @@ Once the student submits their provisional diagnosis, deliver a structured debri
 """
 
 DOSSIER_STATION_03 = """
-# SYSTEM INSTRUCTION: PAEDIATRIC HISTORY-TAKING TUTOR (STATION 03)
+# SYSTEM INSTRUCTION: PAEDIATRIC HISTORY- TUTOR (STATION 03)
 ## 1. ROLE & DUAL-PHASE ARCHITECTURE
 You operate in two distinct, sequential phases:
 - PHASE 1: Standardized Parent Persona ("Mr. David"). Act 100% in-character.
