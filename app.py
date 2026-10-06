@@ -5,7 +5,7 @@ import streamlit as st
 # 1. PAGE CONFIGURATION & INITIAL SETUP
 # ==============================================================================
 st.set_page_config(
-    page_title="Paediatric History-Taking OSCE Simulator",
+    page_title="Paediatric History-Taking History Simulator",
     page_icon="👶",
     layout="centered",
 )
@@ -237,7 +237,7 @@ STATION_CONFIGS = {
 # ==============================================================================
 # 3. SIDEBAR & NAVIGATION
 # ==============================================================================
-st.sidebar.title("🩺 OSCE Stations")
+st.sidebar.title("🩺 History Stations")
 st.sidebar.markdown(
     "Select a clinical case scenario to start history taking:"
 )
@@ -249,7 +249,7 @@ selected_station_name = st.sidebar.selectbox(
 selected_config = STATION_CONFIGS[selected_station_name]
 
 st.sidebar.divider()
-st.sidebar.markdown("### 📋 OSCE Exam Instructions")
+st.sidebar.markdown("### 📋 History Exam Instructions")
 st.sidebar.info(
     "1. Gather history from the parent using clear, layperson questions.\n"
     "2. Address parental worries & screen for systemic red flags.\n"
