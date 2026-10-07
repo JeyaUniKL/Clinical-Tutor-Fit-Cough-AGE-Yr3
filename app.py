@@ -158,12 +158,20 @@ STATION_CONFIGS = {
 # ==============================================================================
 # 3. SIDEBAR & NAVIGATION
 # ==============================================================================
-st.sidebar.title("🩺 OSCE Stations")
+st.sidebar.title("🩺 History Stations")
 
+# --- STUDENT IDENTIFICATION SLOT ---
+st.sidebar.markdown("### 👤 Student Identification")
 student_id = st.sidebar.text_input(
-    "Student Name / ID Number:", placeholder="e.g., Student 1024"
+    "Enter Student Name / ID:",
+    placeholder="e.g., Jay / 1024",
+    help="Your ID will be attached to your session log in the tutor dashboard.",
 )
 
+st.sidebar.divider()
+
+# --- CASE SELECTION ---
+st.sidebar.markdown("### 📋 Case Selection")
 selected_station_name = st.sidebar.selectbox(
     "Choose Clinical Station:", list(STATION_CONFIGS.keys())
 )
@@ -171,67 +179,18 @@ selected_station_name = st.sidebar.selectbox(
 selected_config = STATION_CONFIGS[selected_station_name]
 
 st.sidebar.divider()
-st.sidebar.markdown("### 📋 Instructions")
+st.sidebar.markdown("### 📝 Exam Instructions")
 st.sidebar.info(
     "1. Enter your Name/ID above.\n"
-    "2. Ask focused history questions.\n"
-    "3. Type **END HISTORY** to finish.\n"
-    "4. State your diagnosis when prompted."
+    "2. Gather history using clear, layperson questions.\n"
+    "3. Address parental worries & screen for systemic red flags.\n"
+    "4. When finished, type **END HISTORY** to initiate tutor evaluation.\n"
+    "5. Complete the **Diagnosis Handshake** when prompted."
 )
-
-
-# Function to log session directly to Google Sheet
-def log_session_to_gsheet(student_name, station, messages):
-    if conn is None:
-        return
-    try:
-        user_msgs = [m for m in messages if m["role"] == "user"]
-        assistant_msgs = [m for m in messages if m["role"] == "assistant"]
-
-        # Extract handshake diagnosis (message after "END HISTORY")
-        provisional_dx = "Not specified"
-        for i, m in enumerate(messages):
-            if "END HISTORY" in m["content"].upper() and i + 2 < len(messages):
-                provisional_dx = messages[i + 2]["content"]
-                break
-
-        # Transcript text
-        full_transcript = "\n".join(
-            [f"{m['role'].upper()}: {m['content']}" for m in messages]
-        )
-
-        # Tutor feedback
-        tutor_feedback = assistant_msgs[-1]["content"] if assistant_msgs else ""
-
-        new_row = pd.DataFrame(
-            [
-                {
-                    "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "Student Name/ID": (
-                        student_name if student_name else "Anonymous"
-                    ),
-                    "Station Name": station,
-                    "Turn Count": len(user_msgs),
-                    "Provisional Diagnosis Submitted": provisional_dx,
-                    "Full Chat Transcript": full_transcript,
-                    "Tutor Feedback": tutor_feedback,
-                }
-            ]
-        )
-
-        # Read existing sheet data and append
-        existing_data = conn.read(ttl=0)
-        updated_df = pd.concat([existing_data, new_row], ignore_index=True)
-        conn.update(data=updated_df)
-        st.success("✅ Session data successfully saved to Tutor Dashboard!")
-    except Exception as e:
-        st.warning(f"Note: Automatic cloud logging skipped ({e})")
-
 
 if st.sidebar.button("🔄 Reset Current Station", use_container_width=True):
     st.session_state.current_station = None
     st.rerun()
-
 # ==============================================================================
 # 4. CHAT SESSION STATE INITIALIZATION
 # ==============================================================================
