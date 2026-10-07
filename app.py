@@ -300,19 +300,25 @@ if user_input := st.chat_input("Ask a question or type 'END HISTORY'..."):
                 st.markdown(response.text)
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
 
-                # Check if tutor evaluation has been triggered across ANY station
+                # Check if this is the Handshake vs Final Tutor Evaluation
                 response_text_upper = response.text.upper()
-                is_tutor_response = any(phrase in response_text_upper for phrase in [
-                    "[SIMULATION ENDED]",
+                
+                # Handshake check: asks student for provisional diagnosis
+                is_handshake = "PLEASE STATE YOUR PRIMARY PROVISIONAL DIAGNOSIS" in response_text_upper or "BEFORE I PROVIDE YOUR DETAILED FEEDBACK" in response_text_upper
+
+                # Final Feedback check: detailed evaluation report delivered
+                is_final_tutor_feedback = any(phrase in response_text_upper for phrase in [
                     "SENIOR PAEDIATRIC",
                     "EVIDENCE-BASED MANAGEMENT",
                     "CPG EDUCATIONAL SUMMARY",
                     "TUTOR EVALUATION",
                     "KEY TAKEAWAY",
-                    "HISTORY-TAKING & CLINICAL REASONING"
-                ])
+                    "1. HISTORY-TAKING",
+                    "OVERALL PERFORMANCE"
+                ]) and not is_handshake
 
-                if is_tutor_response and not st.session_state.get("logged", False):
+                # Log ONLY when final tutor feedback is generated
+                if is_final_tutor_feedback and not st.session_state.get("logged", False):
                     log_to_google_sheet()
                     st.session_state.logged = True
 
