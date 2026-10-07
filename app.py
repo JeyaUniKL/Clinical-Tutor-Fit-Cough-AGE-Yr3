@@ -242,7 +242,7 @@ if len(st.session_state.messages) > 2:
     )
 
 # ==============================================================================
-# 6. LOGGING FUNCTION TO GOOGLE SHEETS
+# LOGGING FUNCTION TO GOOGLE SHEETS
 # ==============================================================================
 def log_to_google_sheet():
     if conn is None:
@@ -252,15 +252,26 @@ def log_to_google_sheet():
     try:
         user_msgs = [m for m in st.session_state.messages if m["role"] == "user"]
         
-        # Build full transcript string
+        # 1. Separate History Dialogue from Final Tutor Feedback
+        # Exclude the very last assistant message (which is the full Tutor Feedback report)
+        history_messages = st.session_state.messages[:-1]
+        
         transcript_lines = []
-        for m in st.session_state.messages:
+        provisional_dx = "Not specified"
+
+        for i, m in enumerate(history_messages):
             role_title = "STUDENT" if m["role"] == "user" else "PARENT/TUTOR"
             transcript_lines.append(f"[{role_title}]: {m['content']}")
-        full_transcript = "\n\n".join(transcript_lines)
+            
+            # Extract provisional diagnosis submitted during the handshake
+            if "END HISTORY" in m["content"].upper() and (i + 2) < len(history_messages):
+                provisional_dx = history_messages[i + 2]["content"]
 
-        # Extract tutor feedback
-        tutor_feedback = st.session_state.messages[-1]["content"]
+        # Clean Student-Parent Interaction Transcript (Column F)
+        clean_history_transcript = "\n\n".join(transcript_lines)
+
+        # Standalone Tutor Feedback Report (Column G)
+        tutor_feedback_report = st.session_state.messages[-1]["content"]
 
         # Malaysian Standard Time (MYT - UTC+8)
         myt = pytz.timezone("Asia/Kuala_Lumpur")
@@ -272,9 +283,9 @@ def log_to_google_sheet():
             "Student Name/ID": student_id if student_id else "Anonymous Student",
             "Station Name": selected_station_name,
             "Turn Count": len(user_msgs),
-            "Provisional Diagnosis Submitted": "Submitted in dialogue",
-            "Full Chat Transcript": full_transcript,
-            "Tutor Feedback": tutor_feedback
+            "Provisional Diagnosis Submitted": provisional_dx,
+            "Full Chat Transcript": clean_history_transcript,
+            "Tutor Feedback": tutor_feedback_report
         }])
 
         # Read existing sheet data and append
