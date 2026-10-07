@@ -270,3 +270,66 @@ if user_input := st.chat_input("Ask a question or type 'END HISTORY'..."):
 
             except Exception as e:
                 st.error(f"Error communicating with Gemini API: {e}")
+# ==============================================================================
+# LOGGING FUNCTION TO GOOGLE SHEETS
+# ==============================================================================
+def log_to_google_sheet():
+    if conn is None:
+        st.error("Google Sheet connection object is not initialized.")
+        return
+
+    try:
+        user_msgs = [m for m in st.session_state.messages if m["role"] == "user"]
+        
+        # Build full transcript string
+        transcript_lines = []
+        for m in st.session_state.messages:
+            role_title = "STUDENT" if m["role"] == "user" else "PARENT/TUTOR"
+            transcript_lines.append(f"[{role_title}]: {m['content']}")
+        full_transcript = "\n\n".join(transcript_lines)
+
+        # Extract tutor feedback
+        tutor_feedback = st.session_state.messages[-1]["content"]
+
+        # Create DataFrame for new row
+        new_row = pd.DataFrame([{
+            "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "Student Name/ID": student_id if student_id else "Anonymous Student",
+            "Station Name": selected_station_name,
+            "Turn Count": len(user_msgs),
+            "Provisional Diagnosis Submitted": "Submitted in dialogue",
+            "Full Chat Transcript": full_transcript,
+            "Tutor Feedback": tutor_feedback
+        }])
+
+        # Read existing sheet data and append
+        existing_df = conn.read(ttl=0)
+        updated_df = pd.concat([existing_df, new_row], ignore_index=True)
+        conn.update(data=updated_df)
+        st.success("✅ Session data successfully saved to Tutor Dashboard!")
+    except Exception as e:
+        st.error(f"❌ Failed to log to Google Sheets: {e}")
+
+# ==============================================================================
+# USER INPUT & CHAT RESPONSE LOOP
+# ==============================================================================
+if user_input := st.chat_input("Ask a question or type 'END HISTORY'..."):
+    st.session_state.messages.append({"role": "user", "content": user_input})
+    with st.chat_message("user"):
+        st.markdown(user_input)
+
+    with st.chat_message("assistant"):
+        with st.spinner("Responding..."):
+            try:
+                response = st.session_state.chat.send_message(user_input)
+                st.markdown(response.text)
+                st.session_state.messages.append({"role": "assistant", "content": response.text})
+
+                # Trigger log whenever tutor evaluation is delivered
+                if "Senior Paediatric Clinical Tutor" in response.text or "CPG Educational Summary" in response.text or "1. History-Taking" in response.text:
+                    if not st.session_state.get("logged", False):
+                        log_to_google_sheet()
+                        st.session_state.logged = True
+
+            except Exception as e:
+                st.error(f"Error communicating with Gemini API: {e}")
