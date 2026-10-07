@@ -117,7 +117,7 @@ DOSSIER_STATION_03 = """
 - Information Disclosure Policy: Concise (1-2 sentences max). Answer ONLY what is asked.
 
 ### CLINICAL KNOWLEDGE BASE (STATION 03)
-1. Onset: Day 1 runny nose $\rightarrow$ Day 2 dry cough/wheeze $\rightarrow$ Day 3 breathing fast, chest retractions.
+1. Onset: Day 1 runny nose -> Day 2 dry cough/wheeze -> Day 3 breathing fast, chest retractions.
 2. Feeding: Drinks 50-60 mL per feed (normal 150 mL) due to shortness of breath (<50% intake). 2 wet diapers today.
 3. Red Flags: No apnoea, no central cyanosis, no stridor.
 4. Background: Term birth, 3y brother had cold last week, non-smoking home.
@@ -191,6 +191,7 @@ st.sidebar.info(
 if st.sidebar.button("🔄 Reset Current Station", use_container_width=True):
     st.session_state.current_station = None
     st.rerun()
+
 # ==============================================================================
 # 4. CHAT SESSION STATE INITIALIZATION
 # ==============================================================================
@@ -239,39 +240,8 @@ if len(st.session_state.messages) > 2:
         use_container_width=True,
     )
 
-# Input Handle
-if user_input := st.chat_input("Ask a question or type 'END HISTORY'..."):
-    st.session_state.messages.append({"role": "user", "content": user_input})
-    with st.chat_message("user"):
-        st.markdown(user_input)
-
-    with st.chat_message("assistant"):
-        with st.spinner("Responding..."):
-            try:
-                response = st.session_state.chat.send_message(user_input)
-                st.markdown(response.text)
-                st.session_state.messages.append(
-                    {"role": "assistant", "content": response.text}
-                )
-
-                # Check if tutor feedback has been delivered to log to Google Sheets
-                if (
-                    "[SIMULATION ENDED]" not in response.text
-                    and "Senior Paediatric" in response.text
-                    or "CPG Educational Summary" in response.text
-                ):
-                    if not st.session_state.get("logged", False):
-                        log_session_to_gsheet(
-                            student_id,
-                            selected_station_name,
-                            st.session_state.messages,
-                        )
-                        st.session_state.logged = True
-
-            except Exception as e:
-                st.error(f"Error communicating with Gemini API: {e}")
 # ==============================================================================
-# LOGGING FUNCTION TO GOOGLE SHEETS
+# 6. LOGGING FUNCTION TO GOOGLE SHEETS
 # ==============================================================================
 def log_to_google_sheet():
     if conn is None:
@@ -311,7 +281,7 @@ def log_to_google_sheet():
         st.error(f"❌ Failed to log to Google Sheets: {e}")
 
 # ==============================================================================
-# USER INPUT & CHAT RESPONSE LOOP
+# 7. USER INPUT & CHAT RESPONSE LOOP
 # ==============================================================================
 if user_input := st.chat_input("Ask a question or type 'END HISTORY'..."):
     st.session_state.messages.append({"role": "user", "content": user_input})
