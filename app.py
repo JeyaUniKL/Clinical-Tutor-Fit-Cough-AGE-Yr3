@@ -1,6 +1,7 @@
 from datetime import datetime
 import google.generativeai as genai
 import pandas as pd
+import pytz
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
 
@@ -261,9 +262,13 @@ def log_to_google_sheet():
         # Extract tutor feedback
         tutor_feedback = st.session_state.messages[-1]["content"]
 
+        # Malaysian Standard Time (MYT - UTC+8)
+        myt = pytz.timezone("Asia/Kuala_Lumpur")
+        timestamp_myt = datetime.now(myt).strftime("%Y-%m-%d %H:%M:%S")
+
         # Create DataFrame for new row
         new_row = pd.DataFrame([{
-            "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "Timestamp": timestamp_myt,
             "Student Name/ID": student_id if student_id else "Anonymous Student",
             "Station Name": selected_station_name,
             "Turn Count": len(user_msgs),
@@ -295,11 +300,21 @@ if user_input := st.chat_input("Ask a question or type 'END HISTORY'..."):
                 st.markdown(response.text)
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
 
-                # Trigger log whenever tutor evaluation is delivered
-                if "Senior Paediatric Clinical Tutor" in response.text or "CPG Educational Summary" in response.text or "1. History-Taking" in response.text:
-                    if not st.session_state.get("logged", False):
-                        log_to_google_sheet()
-                        st.session_state.logged = True
+                # Check if tutor evaluation has been triggered across ANY station
+                response_text_upper = response.text.upper()
+                is_tutor_response = any(phrase in response_text_upper for phrase in [
+                    "[SIMULATION ENDED]",
+                    "SENIOR PAEDIATRIC",
+                    "EVIDENCE-BASED MANAGEMENT",
+                    "CPG EDUCATIONAL SUMMARY",
+                    "TUTOR EVALUATION",
+                    "KEY TAKEAWAY",
+                    "HISTORY-TAKING & CLINICAL REASONING"
+                ])
+
+                if is_tutor_response and not st.session_state.get("logged", False):
+                    log_to_google_sheet()
+                    st.session_state.logged = True
 
             except Exception as e:
                 st.error(f"Error communicating with Gemini API: {e}")
