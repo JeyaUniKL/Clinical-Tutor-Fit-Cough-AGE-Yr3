@@ -242,18 +242,17 @@ if len(st.session_state.messages) > 2:
     )
 
 # ==============================================================================
-# LOGGING FUNCTION TO GOOGLE SHEETS
+# 6. LOGGING FUNCTION TO GOOGLE SHEETS (NON-BLOCKING)
 # ==============================================================================
 def log_to_google_sheet():
     if conn is None:
-        st.error("Google Sheet connection object is not initialized.")
+        st.sidebar.warning("⚠️ Google Sheet connection not initialized.")
         return
 
     try:
         user_msgs = [m for m in st.session_state.messages if m["role"] == "user"]
         
         # 1. Separate History Dialogue from Final Tutor Feedback
-        # Exclude the very last assistant message (which is the full Tutor Feedback report)
         history_messages = st.session_state.messages[:-1]
         
         transcript_lines = []
@@ -263,7 +262,7 @@ def log_to_google_sheet():
             role_title = "STUDENT" if m["role"] == "user" else "PARENT/TUTOR"
             transcript_lines.append(f"[{role_title}]: {m['content']}")
             
-            # Extract provisional diagnosis submitted during the handshake
+            # Extract provisional diagnosis submitted during handshake
             if "END HISTORY" in m["content"].upper() and (i + 2) < len(history_messages):
                 provisional_dx = history_messages[i + 2]["content"]
 
@@ -292,9 +291,10 @@ def log_to_google_sheet():
         existing_df = conn.read(ttl=0)
         updated_df = pd.concat([existing_df, new_row], ignore_index=True)
         conn.update(data=updated_df)
-        st.success("✅ Session data successfully saved to Tutor Dashboard!")
+        st.sidebar.success("✅ Logged to Dashboard")
     except Exception as e:
-        st.error(f"❌ Failed to log to Google Sheets: {e}")
+        # Catch errors gracefully in the sidebar so the main chat UI never freezes
+        st.sidebar.warning(f"⚠️ Cloud log delayed ({e}). Please download transcript.")
 
 # ==============================================================================
 # 7. USER INPUT & CHAT RESPONSE LOOP
