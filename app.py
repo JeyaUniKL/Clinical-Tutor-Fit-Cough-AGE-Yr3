@@ -295,7 +295,6 @@ def log_to_google_sheet():
     except Exception as e:
         # Catch errors gracefully in the sidebar so the main chat UI never freezes
         st.sidebar.warning(f"⚠️ Cloud log delayed ({e}). Please download transcript.")
-
 # ==============================================================================
 # 7. USER INPUT & CHAT RESPONSE LOOP
 # ==============================================================================
