@@ -311,13 +311,11 @@ if user_input := st.chat_input("Ask a question or type 'END HISTORY'..."):
                 st.markdown(response.text)
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
 
-                # Check if this is the Handshake vs Final Tutor Evaluation
                 response_text_upper = response.text.upper()
                 
-                # Handshake check: asks student for provisional diagnosis
+                # Check if this is Handshake vs Final Tutor Evaluation
                 is_handshake = "PLEASE STATE YOUR PRIMARY PROVISIONAL DIAGNOSIS" in response_text_upper or "BEFORE I PROVIDE YOUR DETAILED FEEDBACK" in response_text_upper
 
-                # Final Feedback check: detailed evaluation report delivered
                 is_final_tutor_feedback = any(phrase in response_text_upper for phrase in [
                     "SENIOR PAEDIATRIC",
                     "EVIDENCE-BASED MANAGEMENT",
@@ -328,10 +326,14 @@ if user_input := st.chat_input("Ask a question or type 'END HISTORY'..."):
                     "OVERALL PERFORMANCE"
                 ]) and not is_handshake
 
-                # Log ONLY when final tutor feedback is generated
+                # Safe non-blocking execution call
                 if is_final_tutor_feedback and not st.session_state.get("logged", False):
-                    log_to_google_sheet()
+                    # Flag as logged first to prevent duplicate loops
                     st.session_state.logged = True
+                    try:
+                        log_to_google_sheet()
+                    except Exception as log_err:
+                        st.sidebar.warning("⚠️ Log delayed. Please download transcript.")
 
             except Exception as e:
                 st.error(f"Error communicating with Gemini API: {e}")
